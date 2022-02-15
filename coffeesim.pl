@@ -18,12 +18,23 @@ time_to_prepare(Base, Options, TotalTime) :-
   sum_list(AddOnTimes, TotalAddOnTime),
   TotalTime is BaseTime + TotalAddOnTime.
 
-add_customers_to_queue(_, OutLines) :- 
-  OutLines = [],
+add_customers_to_queue(InLine, Tick, OutLines) :- 
+  random_between(0, 1, CoinFlip),
+  (CoinFlip = 1 ->
+    OutLines = [car(Tick)|InLine]
+    ; OutLines = InLine),
   true.
 
+add_customers_to_queues([], _, OutLines) :- OutLines = OutLines.
+add_customers_to_queues([FirstQ|RestQ], Tick, OutLines) :-
+  add_customers_to_queue(FirstQ, Tick, OutQ),
+  add_customers_to_queues(RestQ, Tick, OutQs),
+  OutLines = [OutQ|OutQs].
+
 simloop(Tick, WaitLines) :- (Tick < 100 -> 
-                              format("~d", Tick),
+                              format("Tick: ~d~n", Tick),
+                              add_customers_to_queues(WaitLines, Tick, WaitLines2),
+                              format("Lines: ~w~n", WaitLines2),
                               simloop(Tick+1, WaitLines)
                             ; true).
 
