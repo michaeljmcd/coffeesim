@@ -21,11 +21,11 @@ time_to_prepare(Base, Options, TotalTime) :-
 add_customers_to_queue(InLine, Tick, OutLines) :- 
   random_between(0, 1, CoinFlip),
   (CoinFlip = 1 ->
-    OutLines = [car(Tick)|InLine]
+    append(InLine, [entry(Tick)], OutLines)
     ; OutLines = InLine),
   true.
 
-add_customers_to_queues([], _, OutLines) :- OutLines = OutLines.
+add_customers_to_queues([], _, OutLines) :- OutLines = [].
 add_customers_to_queues([FirstQ|RestQ], Tick, OutLines) :-
   add_customers_to_queue(FirstQ, Tick, OutQ),
   add_customers_to_queues(RestQ, Tick, OutQs),
@@ -34,7 +34,9 @@ add_customers_to_queues([FirstQ|RestQ], Tick, OutLines) :-
 simloop(Tick, WaitLines) :- (Tick < 100 -> 
                               format("Tick: ~d~n", Tick),
                               add_customers_to_queues(WaitLines, Tick, WaitLines2),
-                              format("Lines: ~w~n", WaitLines2),
-                              simloop(Tick+1, WaitLines)
+                              print("Lines: "),
+                              print(WaitLines2),
+                              print("~n"),
+                              simloop(Tick+1, WaitLines2)
                             ; true).
 
